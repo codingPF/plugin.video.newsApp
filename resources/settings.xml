@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+	<category label="30000">
+		<setting id="useARD"     type="bool"     label="30001"     default="true"/>
+		<setting id="useZDF"     type="bool"     label="30002"     default="true"/>
+	</category>
+</settings>
