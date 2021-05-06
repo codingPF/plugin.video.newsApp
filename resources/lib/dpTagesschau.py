@@ -70,9 +70,11 @@ class DpTagesschau(object):
                 elif channel.get('streams').get('h264s') is not None:
                     dataModel.url = channel.get('streams').get('h264s')
             #
-            startTime = channel.get('start').replace('.000+', '+')
-            endTime = channel.get('end').replace('.000+', '+')
+            startTime = channel.get('start')
+            endTime = channel.get('end')
             if dataModel.title.startswith('Aktuelle Sendung') and startTime is not None and endTime is not None:
+                startTime = startTime.replace('.000+', '+')
+                endTime = endTime.replace('.000+', '+')
                 dataModel.urlAdaptive = dataModel.urlAdaptive + '?start={}&end={}'.format(startTime, endTime)
                 dataModel.aired = startTime[0:19].replace('T', ' ')
             #
