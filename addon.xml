@@ -21,9 +21,8 @@
         <language>de en</language>
         <license>MIT</license>
         <forum>noForum</forum>
-        <source>https://github.com/mediathekview/plugin.video.newsApp</source>
-        <website>noWebside</website>
-        <email>noEmail</email>
+        <source>https://github.com/codingPF/plugin.video.newsApp</source>
+        <email>j-doo@gmx.d</email>
         <assets>
             <icon>resources/icon.png</icon>
             <fanart>resources/fanart.jpg</fanart>
