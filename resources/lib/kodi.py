@@ -5,14 +5,10 @@ Kodi Interface
 SPDX-License-Identifier: MIT
 """
 import sys
-
-import resources.lib.appContext as appContext
-import resources.lib.utils as pyUtils
 import xbmc
 import xbmcvfs
 import xbmcgui
 import xbmcplugin
-
 try:
     # Python 3.x
     from urllib.parse import urlencode
@@ -21,6 +17,9 @@ except ImportError:
     # Python 2.x
     from urllib import urlencode
     from urlparse import parse_qs
+
+import resources.lib.appContext as appContext
+import resources.lib.utils as pyUtils
 
 
 class Kodi(object):
@@ -135,3 +134,76 @@ class Kodi(object):
             self.executebuiltin('Container.SetViewMode({})'.format(viewId))
 
 ###############################################################
+
+    def resolveViewId(self, pViewname):
+        skinName = self.getSkinName()
+        viewId = -1
+        # skin.estuary
+        skinEstuary = 'skin.estuary'
+        skinEstouchy = 'skin.estouchy'
+        skinConfluence = 'skin.confluence'
+        #
+        viewMain = 'MAIN'
+        viewShow = 'SHOWS'
+        viewList = 'LIST'
+        viewThump = 'THUMBNAIL'
+        #
+        if skinName == skinEstuary:
+            if pViewname == viewMain:
+                viewId = 55
+            elif pViewname == viewShow:
+                viewId = 55
+            elif pViewname == viewList:
+                viewId = 55
+            elif pViewname == viewThump:
+                viewId = 500
+        elif skinName == skinEstouchy:
+            if pViewname == viewMain:
+                viewId = 500
+            elif pViewname == viewShow:
+                viewId = 500
+            elif pViewname == viewList:
+                viewId = 550
+            elif pViewname == viewThump:
+                viewId = 55
+        elif skinName == skinConfluence:
+            if pViewname == viewMain:
+                viewId = 51
+            elif pViewname == viewShow:
+                viewId = 51
+            elif pViewname == viewList:
+                viewId = 504
+            elif pViewname == viewThump:
+                viewId = 500
+        #
+        self.logger.debug('proposed view id {} for {} in mode {}', viewId, skinName, pViewname)
+        return viewId;
+
+##############################################################
+
+    def get_entered_text(self, deftext=None, heading=None, hidden=False):
+        """
+        Asks the user to enter a text. The method returnes a tuple with
+        the text and the confirmation status: `( "Entered Text", True, )`
+
+        Args:
+            deftext(str|int, optional): Default text in the text entry box.
+                Can be a string or a numerical id to a localized text. This
+                text will be returned if the user selects `Cancel`
+
+            heading(str|int, optional): Heading text of the text entry UI.
+                Can be a string or a numerical id to a localized text.
+
+            hidden(bool, optional): If `True` the entered text is not
+                desplayed. Placeholders are used for every char. Default
+                is `False`
+        """
+        heading = self.localizeString(heading) if isinstance(heading, int) else heading if heading is not None else ''
+        deftext = self.localizeString(deftext) if isinstance(deftext, int) else deftext if deftext is not None else ''
+        keyboard = xbmc.Keyboard(deftext, heading, 1 if hidden else 0)
+        keyboard.doModal()
+        if keyboard.isConfirmed():
+            enteredText = keyboard.getText();
+            enteredText = pyUtils.py2_decode(enteredText);
+            return (enteredText, True, )
+        return (deftext, False, )
