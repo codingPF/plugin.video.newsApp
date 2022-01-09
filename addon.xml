@@ -20,7 +20,6 @@
         <platform>all</platform>
         <language>de en</language>
         <license>MIT</license>
-        <forum>noForum</forum>
         <source>https://github.com/codingPF/plugin.video.newsApp</source>
         <email>j-doo@gmx.d</email>
         <assets>
