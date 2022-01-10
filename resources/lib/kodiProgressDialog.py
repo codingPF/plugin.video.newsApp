@@ -4,17 +4,19 @@ Kodi Interface to progress dialog
 
 SPDX-License-Identifier: MIT
 """
-import resources.lib.appContext as appContext
-import xbmc
 import xbmcgui
+import xbmc
+import resources.lib.appContext as appContext
 
 
 class KodiProgressDialog(object):
     """ Kodi Progress Dialog Class """
 
     def __init__(self):
+        self.logger = appContext.LOGGER.getInstance('KodiProgressDialog')
         self.language = appContext.ADDONCLASS.getLocalizedString
         self.pgdialog = None
+        self.lastProgress = 0
 
     def __del__(self):
         self.close()
@@ -37,6 +39,7 @@ class KodiProgressDialog(object):
             self.pgdialog.create(heading, message)
         else:
             self.pgdialog.update(0, heading, message)
+            self.lastProgress = 0
 
     def update(self, percent, heading=None, message=None):
         """
@@ -54,7 +57,13 @@ class KodiProgressDialog(object):
         if self.pgdialog is not None:
             heading = self.language(heading) if isinstance(heading, int) else heading
             message = self.language(message) if isinstance(message, int) else message
-            self.pgdialog.update(percent, heading, message)
+            if self.lastProgress+9 < percent:
+                self.pgdialog.update(percent, heading, message)
+                self.lastProgress = percent
+                self.logger.debug('update progress {}', percent)
+
+    def updateProgress(self, pDone, pTotal):
+        self.update( int( (pDone / ( pTotal * 1.0 ) ) * 100 ) )
 
     def close(self):
         """ Closes a progress dialog """
