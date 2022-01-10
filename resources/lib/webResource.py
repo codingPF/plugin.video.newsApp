@@ -100,7 +100,7 @@ class WebResource(object):
             #
             outstr = decomp.flush()
             #
-            outputString = ''.join(rsArrayBuffer)
+            outputString = b''.join(rsArrayBuffer)
             #
         return outputString
             
