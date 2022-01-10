@@ -6,4 +6,6 @@
 
 Dieses [Kodi Mediacenter][1] plugin erlaubt es die Inhalte der [Tagesschau App][2] & der [ZDF Heute App][3] direkt in Kodi zu durchsuchen und abzuspielen. Alle Daten (Audiodateien, Bilder, Icons) werden nicht gespeichert, sondern von der Webseite des Betreibers bedient.
 
+Das Plugin kann über diese [Repository](https://codingPF.github.io/repository.codingPF/) installiert werden.
+
 Viel Spaß
