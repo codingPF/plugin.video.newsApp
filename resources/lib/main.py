@@ -7,9 +7,9 @@ SPDX-License-Identifier: MIT
 """
 import resources.lib.appContext as appContext
 from resources.lib.kodi import Kodi
+from resources.lib.kodiUi import KodiUI
 import resources.lib.dpTagesschau as DpTagesschau
 import resources.lib.dpZdfHeute as DpZdfHeute
-import resources.lib.ui.episodeUi as EpisodeUI
 import resources.lib.utils as pyUtils
 
 
@@ -55,13 +55,71 @@ class Main(Kodi):
             fullName = pyUtils.createPath((self.translatePath(self.settings.getDownloadPath()), name))
             pyUtils.url_retrieve(url, fullName, reporthook=kodiPG.update, chunk_size=65536, aborthook=self.getAbortHook())
             #
+        elif mode == 'zdfFolder':
+            #
+            self._generateZdfFolder()
+            #
+        elif mode == 'zdfEntity':
+            #
+            tgtUrl = pyUtils.b64decode(self.getParameters('urlB64'))
+            self._generateZdfEntity(tgtUrl)
+            #
         else:
-            dataArray = []
+            self._generateTopNewsList()
+
+        #
+
+    # Processors
+
+    def _generateZdfEntity(self, pUrl):
+        dataArray = []
+        dataArray.extend(DpZdfHeute.DpZdfHeute().loadBroadcasts(pUrl))
+        ui = KodiUI(self)
+        for e in dataArray:
+            self.logger.debug('_generateZdfEntity {} - {} - {} - {} - {} - {} - {}', e.id, e.title, e.channel, e.aired, e.duration, e.image, e.url)
+            tgtUrl = self.generateUrl({
+                'mode': "play",
+                'channel': e.channel,
+                'urlB64': pyUtils.b64encode(e.url)
+            })
+            ui.addListItem(pTitle = e.title, pUrl = tgtUrl, pPlot = e.title, pDuration = e.duration, pAired = e.aired, pIcon = e.image)
+        ui.render()
+            
+    def _generateZdfFolder(self):
+        dataArray = []
+        dataArray.extend(DpZdfHeute.DpZdfHeute().loadShows())
+        ui = KodiUI(self)
+        for e in dataArray:
+            self.logger.debug('_generateZdfFolder {} - {} - {} - {}', e.id, e.title, e.url, e.image)
+            tgtUrl = self.generateUrl({
+                'mode': "zdfEntity",
+                'urlB64': pyUtils.b64encode(e.url)
+            })
+            ui.addDirectoryItem(pTitle = e.title, pUrl = tgtUrl, pIcon = e.image)
+        ui.render()
+
+    def _generateTopNewsList(self):
             self.logger.debug('Settings: isUseArd "{}" isUseZdf "{}" type of {}', self.settings.isUseArd(), self.settings.isUseZdf(), type(self.settings.isUseArd()));
+            dataArray = []
             if self.settings.isUseArd():
                 dataArray.extend(DpTagesschau.DpTagesschau().loadData())
             if self.settings.isUseZdf():
                 dataArray.extend(DpZdfHeute.DpZdfHeute().loadData())
-            ui = EpisodeUI.EpisodeUI(self)
-            ui.generate(dataArray)
-        #
+            ##
+            ui = KodiUI(self)
+            #
+            zdfFolderUrl = self.generateUrl({'mode': "zdfFolder"})
+            #ui.addListItem(pTitle='ZDF', pUrl=zdfFolderUrl, pPlayable = 'True', pFolder = True)
+            ui.addDirectoryItem(pTitle='ZDF', pUrl=zdfFolderUrl)
+            #
+            dataArray = sorted(dataArray, key=lambda d: d.aired, reverse=True) 
+            #
+            for e in dataArray:
+                self.logger.debug('_generateTopNewsList {} - {} - {} - {} - {} - {} - {}', e.id, e.title, e.aired, e.duration, e.image, e.url, e.urlAdaptive)
+                tgtUrl = self.generateUrl({
+                    'mode': "play",
+                    'channel': e.channel,
+                    'urlB64': pyUtils.b64encode(e.urlAdaptive)
+                })
+                ui.addListItem(pTitle = e.title, pUrl = tgtUrl, pPlot = e.title, pDuration = e.duration, pAired = e.aired, pIcon = e.image)
+            ui.render()

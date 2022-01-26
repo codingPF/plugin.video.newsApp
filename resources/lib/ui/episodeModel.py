@@ -14,8 +14,9 @@ class EpisodeModel(object):
         self.urlAdaptive = None
         self.duration = None
         self.channel = None
+        self.description = None
 
-    def init(self, pId, pTitle, pAired, pImage, pUrl, pUrlAdaptive, pDuration, pChannel):
+    def init(self, pId, pTitle, pAired, pImage, pUrl, pUrlAdaptive, pDuration, pChannel, pDescription):
         self.id = pId
         self.title = pTitle
         self.aired = pAired
@@ -24,3 +25,4 @@ class EpisodeModel(object):
         self.urlAdaptive = pUrlAdaptive
         self.duration = pDuration
         self.channel = pChannel
+        self.description = pDescription

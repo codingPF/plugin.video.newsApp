@@ -86,6 +86,108 @@ class DpZdfHeute(object):
             #
         return resultArray
 
+    def loadBroadcasts(self, pUrl):
+        #
+        resultArray = []
+        #
+        # self.kodiPG = PG.KodiProgressDialog()
+        # self.kodiPG.create(30102)
+        #
+        dn = WebResource.WebResource(pUrl)
+        dataString = dn.retrieveAsString()
+        data = json.loads(dataString)
+        #
+        data = data.get('module')
+        data = data[0].get('teaser')
+        for channel in data:
+            dataModel = EpisodeModel.EpisodeModel()
+            dataModel.channel = 'ZDF'
+            dataModel.id = channel.get('id')
+            dataModel.title = channel.get('title')
+            dataModel.description = channel.get('description')
+            if channel.get('editorialDate') is not None:
+                if len(channel.get('editorialDate')) > 0:
+                    dataModel.aired = channel.get('editorialDate')[0:19].replace('T', ' ')
+            #
+            if channel.get('teaserImage') is not None:
+                if channel.get('teaserImage').get('layouts') is not None:
+                    dataModel.image = channel.get('teaserImage').get('layouts').get('original')
+                elif channel.get('teaserImage').get('layouts') is not None:
+                    dataModel.image = channel.get('teaserImage').get('layouts').get('1920x1080')
+                elif channel.get('teaserImage').get('layouts') is not None:
+                    dataModel.image = channel.get('teaserImage').get('layouts').get('1280x720')
+            #
+            if channel.get('video') is not None:
+                dataModel.duration = channel.get('video').get('duration')
+                videoLink = None
+                if channel.get('video').get('streamApiUrlIOS') is not None:
+                    videoLink = channel.get('video').get('streamApiUrlIOS')
+                if channel.get('video').get('streamApiUrlAndroid') is not None:
+                    videoLink = channel.get('video').get('streamApiUrlAndroid')
+                dataModel.urlAdaptive = videoLink
+                dataModel.url = videoLink
+            #
+            resultArray.append(dataModel)
+            #
+        return resultArray
+
+    def loadShows(self):
+        #
+        resultArray = []
+        #
+        # self.kodiPG = PG.KodiProgressDialog()
+        # self.kodiPG.create(30102)
+        #
+        dn = WebResource.WebResource('https://zdf-heute-cdn.live.cellular.de/news/tv-page')
+        dataString = dn.retrieveAsString()
+        data = json.loads(dataString)
+        #
+        data = data.get('module')
+        data = data[0].get('teaser')
+        for channel in data:
+            dataModel = EpisodeModel.EpisodeModel()
+            dataModel.channel = 'ZDF'
+            dataModel.id = channel.get('id')
+            dataModel.title = channel.get('title')
+            if channel.get('editorialDate') is not None:
+                if len(channel.get('editorialDate')) > 0:
+                    dataModel.aired = channel.get('editorialDate')[0:19].replace('T', ' ')
+            #
+            if channel.get('teaserImage') is not None:
+                if channel.get('teaserImage').get('layouts') is not None:
+                    dataModel.image = channel.get('teaserImage').get('layouts').get('original')
+                elif channel.get('teaserImage').get('layouts') is not None:
+                    dataModel.image = channel.get('teaserImage').get('layouts').get('1920x1080')
+                elif channel.get('teaserImage').get('layouts') is not None:
+                    dataModel.image = channel.get('teaserImage').get('layouts').get('1280x720')
+            #
+            dataModel.url = channel.get('url')
+            #
+            resultArray.append(dataModel)
+            #
+        return resultArray
+
+    ## https://zdf-heute-cdn.live.cellular.de/news/abo-brands
+    ## https://zdf-heute-cdn.live.cellular.de/news/start-page
+    
+    def _loadMore(self):
+                #
+        dn = WebResource.WebResource('https://zdf-heute-cdn.live.cellular.de/news/start-page')
+        dataString = dn.retrieveAsString()
+        data = json.loads(dataString)
+        #
+        data = data.get('navigation')
+        data = data.get('menuItems')
+        for menuItem in data:
+            dataModel = EpisodeModel.EpisodeModel()
+            dataModel.channel = 'ZDF'
+            dataModel.id = menuItem.get('id')
+            dataModel.title = menuItem.get('title')
+            if menuItem.get('editorialDate') is not None:
+                if len(menuItem.get('editorialDate')) > 0:
+                    dataModel.aired = menuItem.get('editorialDate')[0:19].replace('T', ' ')
+            dataModel.url = menuItem.get('url')
+
     def loadVideoUrl(self, pUrl):
         dn = WebResource.WebResource(pUrl, {'Api-Auth':'Bearer 20c238b5345eb428d01ae5c748c5076f033dfcc7'})
         dataString = dn.retrieveAsString()
@@ -104,6 +206,8 @@ class DpZdfHeute(object):
                     if (url is not None):
                         urlsMp4.append(url)
         return {'adaptive': urlsAdaptive, 'mp4': urlsMp4}
+
+
 
     def extractValue(self, rootElement, *args):
         root = rootElement;
