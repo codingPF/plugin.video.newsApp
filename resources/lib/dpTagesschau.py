@@ -51,6 +51,8 @@ class DpTagesschau(object):
             if channel.get('date') is not None:
                 if len(channel.get('date')) > 0:
                     dataModel.aired = channel.get('date')[0:19].replace('T', ' ')
+            else:
+                dataModel.aired = '1970-01-01 00:00:00'
             #
             if channel.get('teaserImage') is not None:
                 if channel.get('teaserImage').get('videowebl') is not None:

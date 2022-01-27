@@ -76,7 +76,7 @@ class KodiUI(object):
                 info_labels['duration'] = '{:02d}:{:02d}:00'.format(*divmod(pDuration, 60))
             #
             if pAired:
-                if type(pAired) in (str, unicode):
+                if type(pAired) in (type(''), type(u'')):
                     ndate = pAired
                 else:
                     ndate = (self.tzBase + datetime.timedelta(seconds=(pAired))).isoformat()
