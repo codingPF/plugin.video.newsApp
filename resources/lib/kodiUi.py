@@ -7,6 +7,7 @@ SPDX-License-Identifier: MIT
 import time
 import xbmcplugin
 import xbmcgui
+import xbmc
 import datetime
 import resources.lib.appContext as appContext
 
@@ -15,7 +16,7 @@ class KodiUI(object):
     ###########
     #
     ###########
-    def __init__(self, pAddon, pContentType = 'video', pSortMethods = None, pCacheToDisc = False ):
+    def __init__(self, pAddon, pContentType = '', pSortMethods = None, pCacheToDisc = False, pViewId = None ):
         self.logger = appContext.LOGGER.getInstance('KodiUI')
         self.setting = appContext.SETTINGS
         self.addon = pAddon
@@ -32,9 +33,12 @@ class KodiUI(object):
         #
         self.contentType = pContentType
         self.cacheToDisc = pCacheToDisc
+        self.viewId = pViewId
         self.listItems = []
         self.startTime = 0
         self.tzBase = datetime.datetime.fromtimestamp(0)
+        # just for documentation
+        self.docuContentTypes = ['','video','movies']
 
 
     def addDirectoryItem(self, pTitle, pUrl, pSortTitle = None, pIcon = None, pContextMenu = None):
@@ -119,6 +123,9 @@ class KodiUI(object):
         )
         #
         xbmcplugin.endOfDirectory(self.addon.addon_handle, cacheToDisc=self.cacheToDisc)
+        #
+        if self.viewId:
+            xbmc.executebuiltin('Container.SetViewMode({})'.format(self.viewId))
         #
         self.logger.debug('generated {} item(s) in {} sec', len(self.listItems), round(time.time() - self.startTime, 4))
 
