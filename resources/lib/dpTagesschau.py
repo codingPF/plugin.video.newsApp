@@ -135,7 +135,7 @@ class DpTagesschau(object):
                 showImage[entry.get('broadcastTitle')]=img
                 self.logger.debug('add image for {} {}',entry.get('broadcastTitle'),img)             
         # merge the data from image to index because the index contains old shows
-        for k,v in showImage.items():
+        for k,v in list(showImage.items()):
             dataModel = EpisodeModel.EpisodeModel()
             dataModel.channel = 'ARD'
             dataModel.id = k
