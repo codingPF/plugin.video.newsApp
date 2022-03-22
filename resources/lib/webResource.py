@@ -24,7 +24,6 @@ except ImportError:
     from cStringIO import StringIO
     PY2FOUND = True
 
-
 class WebResource(object):
     """
     Download url
@@ -49,8 +48,8 @@ class WebResource(object):
         #
         if pHeader == None:
             self.header = {
-                'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:38.0) Gecko/20100101 Firefox/38.0',
-                'Accept-encoding': 'gzip'
+                'Accept-Encoding':'gzip, deflate',
+                'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:98.0) Gecko/20100101 Firefox/98.0'
             }
         else:
             self.header = pHeader    
@@ -61,9 +60,11 @@ class WebResource(object):
     def retrieveAsString(self):
         #
         request = Request(self.url)
+        self.logger.debug('url {}',self.url)
         #
         for kkey,vvalue in list(self.header.items()):
             request.add_header(kkey, vvalue)
+            self.logger.debug('header {} {}',kkey,vvalue)
         #
         rsArrayBuffer = []
         #

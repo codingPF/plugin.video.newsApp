@@ -38,7 +38,7 @@ class DpTagesschau(object):
         #
         resultArray = []
         #
-        dn = WebResource.WebResource('https://www.tagesschau.de/api2/channels')
+        dn = WebResource.WebResource('https://www.tagesschau.de/api2/channels/')
         dataString = dn.retrieveAsString()
         data = json.loads(dataString)
         #
@@ -113,7 +113,7 @@ class DpTagesschau(object):
         showIndexPage = {}
         showImage = {}
         #
-        dn = WebResource.WebResource('http://www.tagesschau.de/api/multimedia/sendung/letztesendungen100~_week-true.json')
+        dn = WebResource.WebResource('https://www.tagesschau.de/api/multimedia/sendung/letztesendungen100~_week-true.json')
         dataString = dn.retrieveAsString()
         # load all top show urls to have the index page for all episodes
         data = json.loads(dataString)
@@ -167,7 +167,7 @@ class DpTagesschau(object):
             dataModel.aired = entry.get('broadcastDate')[0:19]
             if entry.get('images') and entry.get('images')[0].get('variants'):
                 allImages = entry.get('images') and entry.get('images')[0].get('variants')
-                self.logger.debug('allImages {}',allImages)
+                #self.logger.debug('allImages {}',allImages)
                 for i in allImages:
                     self.logger.debug('allImages element {}',i)
                     if 'gross16x9' in i:
@@ -175,6 +175,8 @@ class DpTagesschau(object):
                     if 'videowebl' in i:
                         dataModel.image = i.get('videowebl')
             dataModel.url = entry.get('details')
+            if dataModel.url.startswith('http:'):
+                dataModel.url = dataModel.url.replace('http://','https://')
             #
             resultArray.append(dataModel)
             #
