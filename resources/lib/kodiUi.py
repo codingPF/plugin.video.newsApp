@@ -65,15 +65,15 @@ class KodiUI(object):
             listItem = xbmcgui.ListItem(label=pTitle, path=pUrl)
         #
         if pPlayable == 'True':
-            info_labels = {
-                'title': pTitle,
-                'sorttitle': pSortTitle if pSortTitle else pTitle.lower(),
-                'tvshowtitle': pTitle,
-                'plot': pPlot if pPlot else ''
-            }
+            tag = listItem.getVideoInfoTag()
+            tag.setTitle(pTitle)
+            tag.setOriginalTitle(pTitle)
+            tag.setSortTitle(pSortTitle if pSortTitle else pTitle.lower())
+            tag.setTvShowTitle(pTitle)
+            tag.setPlot(pPlot if pPlot else '')
             #
             if pDuration:
-                info_labels['duration'] = '{:02d}:{:02d}:00'.format(*divmod(pDuration, 60))
+                tag.setDuration(pDuration)
             #
             if pAired:
                 if type(pAired) in (type(''), type(u'')):
@@ -81,14 +81,14 @@ class KodiUI(object):
                 else:
                     ndate = (self.tzBase + datetime.timedelta(seconds=(pAired))).isoformat()
                 airedstring = ndate.replace('T', ' ')
-                info_labels['date'] = airedstring[:10]
-                info_labels['aired'] = airedstring[:10]
-                info_labels['dateadded'] = airedstring
+                tag.setDateAdded(airedstring) # (YYYY-MM-DD HH:MM:SS)
+                tag.setFirstAired(airedstring[:10])
+                tag.setLastPlayed(airedstring) #(YYYY-MM-DD HH:MM:SS)
+                tag.setPremiered(airedstring[:10])
+                tag.setYear(int(airedstring[:4]))
+                listItem.setDateTime(ndate) #YYYY-MM-DDThh:mm[TZD]
+                tag.setPlot(self.addon.localizeString(30101).format(airedstring) + (pPlot if pPlot else ''))
                 #
-                info_labels['plot'] = self.addon.localizeString(30101).format(airedstring) + info_labels['plot']
-                #
-            # tpye is video to have plot and aired date etc.
-            listItem.setInfo(type='video', infoLabels=info_labels)
             #
         #
         listItem.setProperty('IsPlayable', pPlayable)
