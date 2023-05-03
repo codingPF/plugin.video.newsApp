@@ -72,47 +72,34 @@ class Main(Kodi):
             #
             self._generateArdFolder()
             #
-        elif mode == 'ardEntity':
-            #
-            tgtUrl = pyUtils.b64decode(self.getParameters('urlB64'))
-            self._generateArdEntity(tgtUrl)
-            #
         else:
             self._generateTopNewsList()
 
         #
 
     # Processors
-
+    
+    # generate all ARD episodes from news
     def _generateArdFolder(self):
+        self.logger.debug('_generateArdFolder')
         dataArray = []
         dataArray.extend(DpTagesschau.DpTagesschau().loadShows())
-        ui = KodiUI(self, pViewId=self.resolveViewId('THUMBNAIL'))
-        for e in dataArray:
-            self.logger.debug('_generateArdFolder {} - {} - {} - {}', e.id, e.title, e.url, e.image)
-            tgtUrl = self.generateUrl({
-                'mode': "ardEntity",
-                'urlB64': pyUtils.b64encode(e.url)
-            })
-            ui.addDirectoryItem(pTitle = e.title, pUrl = tgtUrl, pIcon = e.image)
-        ui.render()
-
-    def _generateArdEntity(self, pUrl):
-        self.logger.debug('_generateArdEntity url{} ', pUrl)
-        dataArray = []
-        dataArray.extend(DpTagesschau.DpTagesschau().loadBroadcasts(pUrl))
         ui = KodiUI(self)
         for e in dataArray:
-            self.logger.debug('_generateArdEntity {} - {} - {} - {} - {} - {} - {}', e.id, e.title, e.channel, e.aired, e.duration, e.image, e.url)
+            self.logger.debug('_generateArdFolder {} - {} - {} - {} - {} - {} - {}', e.id, e.title, e.channel, e.aired, e.duration, e.image, e.url)
             tgtUrl = self.generateUrl({
-                'mode': "ardEpisode",
+                'mode': "play",
                 'channel': e.channel,
                 'urlB64': pyUtils.b64encode(e.url)
             })
             ui.addListItem(pTitle = e.title, pUrl = tgtUrl, pPlot = e.title, pDuration = e.duration, pAired = e.aired, pIcon = e.image)
         ui.render()
 
+   
+
+    # generate all episodes for a ZDF show
     def _generateZdfEntity(self, pUrl):
+        self.logger.debug('_generateZdfEntity')
         dataArray = []
         dataArray.extend(DpZdfHeute.DpZdfHeute().loadBroadcasts(pUrl))
         ui = KodiUI(self)
@@ -125,8 +112,10 @@ class Main(Kodi):
             })
             ui.addListItem(pTitle = e.title, pUrl = tgtUrl, pPlot = e.title, pDuration = e.duration, pAired = e.aired, pIcon = e.image)
         ui.render()
-            
+    
+    # generate all ZDF shows
     def _generateZdfFolder(self):
+        self.logger.debug('_generateZdfFolder')
         dataArray = []
         dataArray.extend(DpZdfHeute.DpZdfHeute().loadShows())
         ui = KodiUI(self, pViewId=self.resolveViewId('THUMBNAIL'))
@@ -139,33 +128,37 @@ class Main(Kodi):
             ui.addDirectoryItem(pTitle = e.title, pUrl = tgtUrl, pIcon = e.image)
         ui.render()
 
+    # generate top level menu
+    # Folder for ARD and ZDF
+    # plus items for all top level episodes for this day
     def _generateTopNewsList(self):
-            self.logger.debug('Settings: isUseArd "{}" isUseZdf "{}" type of {}', self.settings.isUseArd(), self.settings.isUseZdf(), type(self.settings.isUseArd()));
-            dataArray = []
-            ui = KodiUI(self)
+        self.logger.debug('_generateTopNewsList')
+        self.logger.debug('Settings: isUseArd "{}" isUseZdf "{}" type of {}', self.settings.isUseArd(), self.settings.isUseZdf(), type(self.settings.isUseArd()));
+        dataArray = []
+        ui = KodiUI(self)
+        #
+        if self.settings.isUseArd():
+            dataArray.extend(DpTagesschau.DpTagesschau().loadData())
             #
-            if self.settings.isUseArd():
-                dataArray.extend(DpTagesschau.DpTagesschau().loadData())
-                #
-                ardFolderUrl = self.generateUrl({'mode': "ardFolder"})
-                ardIcon = pyUtils.createPath((self.getAddonPath(), 'resources', 'ard.png'))
-                ui.addDirectoryItem(pTitle='ARD', pUrl=ardFolderUrl, pIcon=ardIcon)
+            ardFolderUrl = self.generateUrl({'mode': "ardFolder"})
+            ardIcon = pyUtils.createPath((self.getAddonPath(), 'resources', 'ard.png'))
+            ui.addDirectoryItem(pTitle='ARD', pUrl=ardFolderUrl, pIcon=ardIcon)
+        #
+        if self.settings.isUseZdf():
+            dataArray.extend(DpZdfHeute.DpZdfHeute().loadData())
             #
-            if self.settings.isUseZdf():
-                dataArray.extend(DpZdfHeute.DpZdfHeute().loadData())
-                #
-                zdfFolderUrl = self.generateUrl({'mode': "zdfFolder"})
-                zdfIcon = pyUtils.createPath((self.getAddonPath(), 'resources', 'zdf.png'))
-                ui.addDirectoryItem(pTitle='ZDF', pUrl=zdfFolderUrl, pIcon=zdfIcon)
-            #
-            dataArray = sorted(dataArray, key=lambda d: d.aired, reverse=True) 
-            #
-            for e in dataArray:
-                self.logger.debug('_generateTopNewsList {} - {} - {} - {} - {} - {} - {}', e.id, e.title, e.aired, e.duration, e.image, e.url, e.urlAdaptive)
-                tgtUrl = self.generateUrl({
-                    'mode': "play",
-                    'channel': e.channel,
-                    'urlB64': pyUtils.b64encode(e.urlAdaptive)
-                })
-                ui.addListItem(pTitle = e.title, pUrl = tgtUrl, pPlot = e.title, pDuration = e.duration, pAired = e.aired, pIcon = e.image)
-            ui.render()
+            zdfFolderUrl = self.generateUrl({'mode': "zdfFolder"})
+            zdfIcon = pyUtils.createPath((self.getAddonPath(), 'resources', 'zdf.png'))
+            ui.addDirectoryItem(pTitle='ZDF', pUrl=zdfFolderUrl, pIcon=zdfIcon)
+        #
+        dataArray = sorted(dataArray, key=lambda d: d.aired, reverse=True) 
+        #
+        for e in dataArray:
+            self.logger.debug('_generateTopNewsList {} - {} - {} - {} - {} - {} - {}', e.id, e.title, e.aired, e.duration, e.image, e.url, e.urlAdaptive)
+            tgtUrl = self.generateUrl({
+                'mode': "play",
+                'channel': e.channel,
+                'urlB64': pyUtils.b64encode(e.urlAdaptive)
+            })
+            ui.addListItem(pTitle = e.title, pUrl = tgtUrl, pPlot = e.title, pDuration = e.duration, pAired = e.aired, pIcon = e.image)
+        ui.render()

@@ -33,7 +33,7 @@ class DpZdfHeute(object):
         #
         self.loadcategory()
         #
-
+    
     def loadData(self):
         #
         resultArray = []
@@ -52,35 +52,12 @@ class DpZdfHeute(object):
             dataModel.channel = 'ZDF'
             dataModel.id = channel.get('id')
             dataModel.title = channel.get('title')
-            if channel.get('editorialDate') is not None:
-                if len(channel.get('editorialDate')) > 0:
-                    dataModel.aired = channel.get('editorialDate')[0:19].replace('T', ' ')
-            #
-            if channel.get('teaserImage') is not None:
-                if channel.get('teaserImage').get('layouts') is not None:
-                    dataModel.image = channel.get('teaserImage').get('layouts').get('original')
-                elif channel.get('teaserImage').get('layouts') is not None:
-                    dataModel.image = channel.get('teaserImage').get('layouts').get('1920x1080')
-                elif channel.get('teaserImage').get('layouts') is not None:
-                    dataModel.image = channel.get('teaserImage').get('layouts').get('1280x720')
-            #
+            dataModel.aired = self._extractDate(channel)
+            dataModel.image = self._extractImage(channel)
+            dataModel.urlAdaptive = self._extractVideo(channel);
+            dataModel.url = dataModel.urlAdaptive
             if channel.get('video') is not None:
                 dataModel.duration = channel.get('video').get('duration')
-                videoLink = None
-                if channel.get('video').get('streamApiUrlIOS') is not None:
-                    videoLink = channel.get('video').get('streamApiUrlIOS')
-                if channel.get('video').get('streamApiUrlAndroid') is not None:
-                    videoLink = channel.get('video').get('streamApiUrlAndroid')
-                dataModel.urlAdaptive = videoLink
-                dataModel.url = videoLink
-                """
-                vLinks = self.loadVideoUrl(videoLink)
-                if vLinks is not None:
-                    if (len(vLinks.get('adaptive')) > 0):
-                        dataModel.urlAdaptive = vLinks.get('adaptive')[0]
-                    if (len(vLinks.get('mp4')) > 0):
-                        dataModel.url = vLinks.get('mp4')[0]
-                """
             #
             resultArray.append(dataModel)
             #
@@ -105,27 +82,12 @@ class DpZdfHeute(object):
             dataModel.id = channel.get('id')
             dataModel.title = channel.get('title')
             dataModel.description = channel.get('description')
-            if channel.get('editorialDate') is not None:
-                if len(channel.get('editorialDate')) > 0:
-                    dataModel.aired = channel.get('editorialDate')[0:19].replace('T', ' ')
-            #
-            if channel.get('teaserImage') is not None:
-                if channel.get('teaserImage').get('layouts') is not None:
-                    dataModel.image = channel.get('teaserImage').get('layouts').get('original')
-                elif channel.get('teaserImage').get('layouts') is not None:
-                    dataModel.image = channel.get('teaserImage').get('layouts').get('1920x1080')
-                elif channel.get('teaserImage').get('layouts') is not None:
-                    dataModel.image = channel.get('teaserImage').get('layouts').get('1280x720')
-            #
+            dataModel.aired = self._extractDate(channel)
+            dataModel.image = self._extractImage(channel)
+            dataModel.urlAdaptive = self._extractVideo(channel);
+            dataModel.url = dataModel.urlAdaptive
             if channel.get('video') is not None:
                 dataModel.duration = channel.get('video').get('duration')
-                videoLink = None
-                if channel.get('video').get('streamApiUrlIOS') is not None:
-                    videoLink = channel.get('video').get('streamApiUrlIOS')
-                if channel.get('video').get('streamApiUrlAndroid') is not None:
-                    videoLink = channel.get('video').get('streamApiUrlAndroid')
-                dataModel.urlAdaptive = videoLink
-                dataModel.url = videoLink
             #
             resultArray.append(dataModel)
             #
@@ -149,18 +111,8 @@ class DpZdfHeute(object):
             dataModel.channel = 'ZDF'
             dataModel.id = channel.get('id')
             dataModel.title = channel.get('title')
-            if channel.get('editorialDate') is not None:
-                if len(channel.get('editorialDate')) > 0:
-                    dataModel.aired = channel.get('editorialDate')[0:19].replace('T', ' ')
-            #
-            if channel.get('teaserImage') is not None:
-                if channel.get('teaserImage').get('layouts') is not None:
-                    dataModel.image = channel.get('teaserImage').get('layouts').get('original')
-                elif channel.get('teaserImage').get('layouts') is not None:
-                    dataModel.image = channel.get('teaserImage').get('layouts').get('1920x1080')
-                elif channel.get('teaserImage').get('layouts') is not None:
-                    dataModel.image = channel.get('teaserImage').get('layouts').get('1280x720')
-            #
+            dataModel.aired = self._extractDate(channel)
+            dataModel.image = self._extractImage(channel)
             dataModel.url = channel.get('url')
             #
             resultArray.append(dataModel)
@@ -183,9 +135,7 @@ class DpZdfHeute(object):
             dataModel.channel = 'ZDF'
             dataModel.id = menuItem.get('id')
             dataModel.title = menuItem.get('title')
-            if menuItem.get('editorialDate') is not None:
-                if len(menuItem.get('editorialDate')) > 0:
-                    dataModel.aired = menuItem.get('editorialDate')[0:19].replace('T', ' ')
+            dataModel.aired = self._extractDate(menuItem)
             dataModel.url = menuItem.get('url')
 
     def loadVideoUrl(self, pUrl):
@@ -219,3 +169,32 @@ class DpZdfHeute(object):
             else:
                 root = root.get(searchPath)
         return root;
+
+    def _extractImage(self, rootElement):
+        self.logger.debug('_extractImage from {}',rootElement)
+        image = ''
+        if rootElement.get('teaserImage') is not None:
+            if rootElement.get('teaserImage').get('layouts') is not None:
+                if rootElement.get('teaserImage').get('layouts').get('original') is not None:
+                    image = rootElement.get('teaserImage').get('layouts').get('original')
+                elif len(list(rootElement.get('teaserImage').get('layouts').keys())) > 0:
+                    image = list(rootElement.get('teaserImage').get('layouts').keys())[-1]
+        return image
+    
+    def _extractVideo(self, rootElement):
+        videourl = ''
+        if rootElement.get('video') is not None:
+            if rootElement.get('video').get('streamApiUrlIOS') is not None:
+                videourl = rootElement.get('video').get('streamApiUrlIOS')
+            elif rootElement.get('video').get('streamApiUrlAndroid') is not None:
+                videourl = rootElement.get('video').get('streamApiUrlAndroid')
+            elif len(list(rootElement.get('video').keys())) > 0:
+                videourl = list(rootElement.get('video').keys())[-1]
+        return videourl;
+
+    def _extractDate(self, rootElement):
+        dt = '1970-01-01 00:00:00'
+        if rootElement.get('editorialDate') is not None:
+            if len(rootElement.get('editorialDate')) > 0:
+                dt = rootElement.get('editorialDate')[0:19].replace('T', ' ')
+        return dt;
