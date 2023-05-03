@@ -38,7 +38,8 @@ class DpTagesschau(object):
         #
         resultArray = []
         #
-        dn = WebResource.WebResource('https://www.tagesschau.de/api2/channels/')
+        self.logger.debug('loadData')
+        dn = WebResource.WebResource('https://www.tagesschau.de/api2u/channels')
         dataString = dn.retrieveAsString()
         data = json.loads(dataString)
         #
@@ -48,38 +49,21 @@ class DpTagesschau(object):
             dataModel.channel = 'ARD'
             dataModel.id = channel.get('sophoraId')
             dataModel.title = channel.get('title')
-            if channel.get('date') is not None:
-                if len(channel.get('date')) > 0:
-                    dataModel.aired = channel.get('date')[0:19].replace('T', ' ')
-            else:
-                dataModel.aired = '1970-01-01 00:00:00'
-            #
-            if channel.get('teaserImage') is not None:
-                if channel.get('teaserImage').get('videowebl') is not None:
-                    dataModel.image = channel.get('teaserImage').get('videowebl').get('imageurl')
-                elif channel.get('teaserImage').get('portraetgrossplus8x9') is not None:
-                    dataModel.image = channel.get('teaserImage').get('portraetgrossplus8x9').get('imageurl')
-                elif channel.get('teaserImage').get('videowebm') is not None:
-                    dataModel.image = channel.get('teaserImage').get('videowebm').get('imageurl')
-            #
-            if channel.get('streams') is not None:
-                if channel.get('streams').get('adaptivestreaming') is not None:
-                    dataModel.urlAdaptive = channel.get('streams').get('adaptivestreaming')
-                if channel.get('streams').get('h264xl') is not None:
-                    dataModel.url = channel.get('streams').get('h264xl')
-                elif channel.get('streams').get('h264m') is not None:
-                    dataModel.url = channel.get('streams').get('h264m')
-                elif channel.get('streams').get('h264s') is not None:
-                    dataModel.url = channel.get('streams').get('h264s')
+            dataModel.aired = self._extractDate(channel)
+            dataModel.image = self._extractImage(channel)
+            dataModel.url = self._extractVideo(channel)
+            dataModel.urlAdaptive = dataModel.url
             #
             startTime = channel.get('start')
             endTime = channel.get('end')
             if dataModel.title.startswith('Aktuelle Sendung: Tagesthemen') and startTime is not None and endTime is not None:
                 dataModel.urlAdaptive = dataModel.urlAdaptive + '?start={}&end={}'.format(startTime, (startTime+1000)) #??
                 self.logger.debug('Aktuelle Sendung {}',dataModel.urlAdaptive)
+                self.logger.debug('Aktuelle Sendung Times start {} end {}',startTime,endTime)
                 dataModel.aired = datetime.datetime.fromtimestamp(startTime).isoformat()
             elif dataModel.title.startswith('Aktuelle Sendung') and startTime is not None and endTime is not None:
                 dataModel.urlAdaptive = dataModel.urlAdaptive + '?start={}&end={}'.format(startTime, endTime)
+                self.logger.debug('Aktuelle Sendung Times start {} end {}',startTime,endTime)
                 self.logger.debug('Aktuelle Sendung {}',dataModel.urlAdaptive)
                 dataModel.aired = datetime.datetime.fromtimestamp(startTime).isoformat()
             #
@@ -113,44 +97,23 @@ class DpTagesschau(object):
     def loadShows(self):
         #
         resultArray = []
-        showIndexPage = {}
-        showImage = {}
         #
-        dn = WebResource.WebResource('https://www.tagesschau.de/api/multimedia/sendung/letztesendungen100~_week-true.json')
+        self.logger.debug('loadShows')
+        dn = WebResource.WebResource('https://www.tagesschau.de/api2u/news')
         dataString = dn.retrieveAsString()
         # load all top show urls to have the index page for all episodes
         data = json.loads(dataString)
-        for topUrls in data.get('broadcastsPerTypeUrls'):
-            showIndexPage[topUrls.get('broadcastTitle')]=topUrls.get('url')
-            #self.logger.debug('show index {} {}',topUrls.get('broadcastTitle'),topUrls.get('url'))
-        # lets go into the shows to get the image and make sure we only take shows with episodes
-        for entry in data.get('latestBroadcastsPerType'):
-            
-            if entry.get('broadcastTitle') not in showImage:
-                img = ''
-                if entry.get('images') and entry.get('images')[0].get('variants'):
-                        allImages = entry.get('images') and entry.get('images')[0].get('variants')
-                        #self.logger.debug('allImages {}',allImages)
-                        for i in allImages:
-                            #self.logger.debug('allImages element {}',i)
-                            if 'gross16x9' in i:
-                                img = i.get('gross16x9')
-                            if 'videowebl' in i:
-                                img = i.get('videowebl')
-                showImage[entry.get('broadcastTitle')]=img
-                self.logger.debug('add image for {} {}',entry.get('broadcastTitle'),img)             
-        # merge the data from image to index because the index contains old shows
-        for k,v in list(showImage.items()):
-            dataModel = EpisodeModel.EpisodeModel()
-            dataModel.channel = 'ARD'
-            dataModel.id = k
-            dataModel.title = k
-            dataModel.url = showIndexPage[k]
-            dataModel.image = v
-            #self.logger.debug('create show for {} {} {}',k,v,showIndexPage[k])
-            resultArray.append(dataModel)
-        
-        
+        for entry in data.get('news'):            
+            if entry.get('type') == 'video':
+                dataModel = EpisodeModel.EpisodeModel()
+                dataModel.channel = 'ARD'
+                dataModel.id = entry.get('sophoraId')
+                dataModel.title = entry.get('title')
+                dataModel.aired = self._extractDate(entry)
+                dataModel.url = self._extractVideo(entry)
+                dataModel.image = self._extractImage(entry)
+                self.logger.debug('add image for {} {}',dataModel.title,dataModel.image)             
+                resultArray.append(dataModel)
             #
         return resultArray
 
@@ -158,6 +121,7 @@ class DpTagesschau(object):
         #
         resultArray = []
         #
+        self.logger.debug('loadBroadcasts')
         dn = WebResource.WebResource(pUrl)
         dataString = dn.retrieveAsString()
         data = json.loads(dataString)
@@ -185,4 +149,28 @@ class DpTagesschau(object):
             #
         return resultArray
 
-        
+    def _extractDate(self, rootElement):
+        dt = '1970-01-01 00:00:00'
+        if rootElement.get('date') is not None and len(rootElement.get('date')) > 0:
+          dt = rootElement.get('date')[0:19].replace('T', ' ')
+        return dt
+
+    def _extractImage(self, rootElement):
+        self.logger.debug('_extractImage from {}',rootElement)
+        image = ''
+        if rootElement.get('teaserImage') is not None:
+            if rootElement.get('teaserImage').get('imageVariants') is not None:
+                if rootElement.get('teaserImage').get('imageVariants').get('16x9-512') is not None:
+                    image = rootElement.get('teaserImage').get('imageVariants').get('16x9-512')
+                elif len(list(rootElement.get('teaserImage').get('imageVariants').keys())) > 0:
+                    image = list(rootElement.get('teaserImage').get('imageVariants').keys())[-1]
+        return image
+
+    def _extractVideo(self, rootElement):
+        videourl = ''
+        if rootElement.get('streams') is not None:
+                if rootElement.get('streams').get('adaptivestreaming') is not None:
+                    videourl = rootElement.get('streams').get('adaptivestreaming')
+                elif len(list(rootElement.get('teaserImage').get('imageVariants').keys())) > 0:
+                    videourl = list(rootElement.get('teaserImage').get('imageVariants').keys())[-1]
+        return videourl
