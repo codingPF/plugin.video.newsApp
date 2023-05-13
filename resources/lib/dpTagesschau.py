@@ -53,6 +53,7 @@ class DpTagesschau(object):
             dataModel.image = self._extractImage(channel)
             dataModel.url = self._extractVideo(channel)
             dataModel.urlAdaptive = dataModel.url
+            dataModel.mode = 'play'
             #
             startTime = channel.get('start')
             endTime = channel.get('end')

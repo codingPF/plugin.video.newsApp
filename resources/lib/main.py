@@ -27,25 +27,26 @@ class Main(Kodi):
         mode = self.getParameters('mode')
         parameterId = self.getParameters('id')
         self.logger.info('Run Plugin with Parameters {}', self.getParameters())
-        if mode == 'play':
+        if mode == 'playZdfItem':
             tgtUrl = pyUtils.b64decode(self.getParameters('urlB64'))
-            if self.getParameters('channel') == 'ZDF':
-                self.logger.debug('resolve target url for ZDF {}', tgtUrl)
-                vLinks = DpZdfHeute.DpZdfHeute().loadVideoUrl(tgtUrl)
-                self.logger.debug('VideoUrls {}', vLinks)
-                if vLinks is not None:
-                    if (len(vLinks.get('adaptive')) > 0):
-                        self.logger.debug('VideoUrls adaptive {}', vLinks.get('adaptive'))
-                        tgtUrl = vLinks.get('adaptive')[0]
-                    elif (len(vLinks.get('mp4')) > 0):
-                        self.logger.debug('VideoUrls mp4 {}', vLinks.get('mp4'))
-                        tgtUrl = vLinks.get('mp4')[0]
-                    self.logger.info('Play Url {}', tgtUrl)
-                    self.playItem(tgtUrl)
-            else:
+            self.logger.debug('resolve target url for ZDF {}', tgtUrl)
+            vLinks = DpZdfHeute.DpZdfHeute().loadVideoUrl(tgtUrl)
+            self.logger.debug('VideoUrls {}', vLinks)
+            if vLinks is not None:
+                if (len(vLinks.get('adaptive')) > 0):
+                    self.logger.debug('VideoUrls adaptive {}', vLinks.get('adaptive'))
+                    tgtUrl = vLinks.get('adaptive')[0]
+                elif (len(vLinks.get('mp4')) > 0):
+                    self.logger.debug('VideoUrls mp4 {}', vLinks.get('mp4'))
+                    tgtUrl = vLinks.get('mp4')[0]
                 self.logger.info('Play Url {}', tgtUrl)
                 self.playItem(tgtUrl)
-        if mode == 'ardEpisode':
+        elif mode == 'play':
+            tgtUrl = pyUtils.b64decode(self.getParameters('urlB64'))
+            self.logger.info('Play Url {}', tgtUrl)
+            self.playItem(tgtUrl)
+                                
+        elif mode == 'ardEpisode':
             tgtUrl = pyUtils.b64decode(self.getParameters('urlB64'))
             vLinks = DpTagesschau.DpTagesschau().loadEpisode(tgtUrl)
             self.playItem(vLinks)
@@ -85,17 +86,8 @@ class Main(Kodi):
         dataArray = []
         dataArray.extend(DpTagesschau.DpTagesschau().loadShows())
         ui = KodiUI(self)
-        for e in dataArray:
-            self.logger.debug('_generateArdFolder {} - {} - {} - {} - {} - {} - {}', e.id, e.title, e.channel, e.aired, e.duration, e.image, e.url)
-            tgtUrl = self.generateUrl({
-                'mode': "play",
-                'channel': e.channel,
-                'urlB64': pyUtils.b64encode(e.url)
-            })
-            ui.addListItem(pTitle = e.title, pUrl = tgtUrl, pPlot = e.title, pDuration = e.duration, pAired = e.aired, pIcon = e.image)
+        ui.addItems(dataArray,'play')
         ui.render()
-
-   
 
     # generate all episodes for a ZDF show
     def _generateZdfEntity(self, pUrl):
@@ -103,14 +95,7 @@ class Main(Kodi):
         dataArray = []
         dataArray.extend(DpZdfHeute.DpZdfHeute().loadBroadcasts(pUrl))
         ui = KodiUI(self)
-        for e in dataArray:
-            self.logger.debug('_generateZdfEntity {} - {} - {} - {} - {} - {} - {}', e.id, e.title, e.channel, e.aired, e.duration, e.image, e.url)
-            tgtUrl = self.generateUrl({
-                'mode': "play",
-                'channel': e.channel,
-                'urlB64': pyUtils.b64encode(e.url)
-            })
-            ui.addListItem(pTitle = e.title, pUrl = tgtUrl, pPlot = e.title, pDuration = e.duration, pAired = e.aired, pIcon = e.image)
+        ui.addItems(dataArray, 'playZdfItem')
         ui.render()
     
     # generate all ZDF shows
@@ -119,13 +104,7 @@ class Main(Kodi):
         dataArray = []
         dataArray.extend(DpZdfHeute.DpZdfHeute().loadShows())
         ui = KodiUI(self, pViewId=self.resolveViewId('THUMBNAIL'))
-        for e in dataArray:
-            self.logger.debug('_generateZdfFolder {} - {} - {} - {}', e.id, e.title, e.url, e.image)
-            tgtUrl = self.generateUrl({
-                'mode': "zdfEntity",
-                'urlB64': pyUtils.b64encode(e.url)
-            })
-            ui.addDirectoryItem(pTitle = e.title, pUrl = tgtUrl, pIcon = e.image)
+        ui.addDirectories(dataArray,'zdfEntity')
         ui.render()
 
     # generate top level menu
@@ -153,12 +132,5 @@ class Main(Kodi):
         #
         dataArray = sorted(dataArray, key=lambda d: d.aired, reverse=True) 
         #
-        for e in dataArray:
-            self.logger.debug('_generateTopNewsList {} - {} - {} - {} - {} - {} - {}', e.id, e.title, e.aired, e.duration, e.image, e.url, e.urlAdaptive)
-            tgtUrl = self.generateUrl({
-                'mode': "play",
-                'channel': e.channel,
-                'urlB64': pyUtils.b64encode(e.urlAdaptive)
-            })
-            ui.addListItem(pTitle = e.title, pUrl = tgtUrl, pPlot = e.title, pDuration = e.duration, pAired = e.aired, pIcon = e.image)
+        ui.addItems(dataArray)
         ui.render()
