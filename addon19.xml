@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="plugin.video.newsApp"
 	name="News App"
-	version="1.1.0+matrix.1"
+	version="1.1.1+matrix.1"
 	provider-name="codingPF">
 	<requires>
 		<import addon="xbmc.python" version="3.0.0"/>
@@ -17,6 +17,8 @@
 		<description lang="de_DE">News aus der Tagesschau App und ZDF Heute App</description>
 		<description lang="en_GB">News from Tagessschau App and ZDF Heute App</description>
         <news>
+v1.1.1
+- Source code cleanup
 v1.1.0
 - Update ARD API
 - Cleanup ZDF
