@@ -10,6 +10,7 @@ import xbmcgui
 import xbmc
 import datetime
 import resources.lib.appContext as appContext
+import resources.lib.utils as pyUtils
 
 class KodiUI(object):
 
@@ -40,6 +41,29 @@ class KodiUI(object):
         # just for documentation
         self.docuContentTypes = ['','video','movies']
 
+    ######################################
+    
+    def addDirectories(self, pDataArray, pmode = None):
+        self.logger.debug('addDirectory')
+        for e in pDataArray:
+            self.logger.debug('addDirectory {} : {} - {} - {} - {}', (pmode or e.mode), e.id, e.title, e.url, e.image)
+            tgtUrl = self.addon.generateUrl({
+                'mode': (pmode or e.mode),
+                'urlB64': pyUtils.b64encode(e.url)
+            })
+            self.addDirectoryItem(pTitle = e.title, pUrl = tgtUrl, pIcon = e.image)
+
+    def addItems(self, pDataArray, pmode = None):
+        self.logger.debug('addItems')
+        for e in pDataArray:
+            self.logger.debug('addItems {} : {} - {} - {} - {} - {} - {} - {}', (pmode or e.mode), e.id, e.title, e.channel, e.aired, e.duration, e.image, e.url)
+            tgtUrl = self.addon.generateUrl({
+                'mode': (pmode or e.mode),
+                'urlB64': pyUtils.b64encode(e.url)
+            })
+            self.addListItem(pTitle = e.title, pUrl = tgtUrl, pPlot = e.title, pDuration = e.duration, pAired = e.aired, pIcon = e.image)
+         
+    ######################################
 
     def addDirectoryItem(self, pTitle, pUrl, pSortTitle = None, pIcon = None, pContextMenu = None):
         self.addListItem(
@@ -108,7 +132,8 @@ class KodiUI(object):
         #
         self.listItems.append((pUrl, listItem, pFolder))
         #
-
+    
+    # add aöö generated list items in one go
     def render(self):
         #
         for method in self.allSortMethods:

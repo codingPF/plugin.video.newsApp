@@ -56,6 +56,7 @@ class DpZdfHeute(object):
             dataModel.image = self._extractImage(channel)
             dataModel.urlAdaptive = self._extractVideo(channel);
             dataModel.url = dataModel.urlAdaptive
+            dataModel.mode = 'playZdfItem'
             if channel.get('video') is not None:
                 dataModel.duration = channel.get('video').get('duration')
             #
