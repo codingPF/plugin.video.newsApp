@@ -21,7 +21,7 @@ class DpZdfHeute(object):
     """
 
     def __init__(self):
-        self.logger = appContext.LOGGER.getInstance('DpTdfHeute')
+        self.logger = appContext.LOGGER.getInstance('DpZdfHeute')
         self.settings = appContext.SETTINGS
         self.starttime = time.time()
 
@@ -179,18 +179,22 @@ class DpZdfHeute(object):
                 if rootElement.get('teaserImage').get('layouts').get('original') is not None:
                     image = rootElement.get('teaserImage').get('layouts').get('original')
                 elif len(list(rootElement.get('teaserImage').get('layouts').keys())) > 0:
-                    image = list(rootElement.get('teaserImage').get('layouts').keys())[-1]
+                    imageKey = list(rootElement.get('teaserImage').get('layouts').keys())[-1] 
+                    image = rootElement.get('teaserImage').get('layouts').get(imageKey)
+        self.logger.debug('_extractImage found {}',image)
         return image
     
     def _extractVideo(self, rootElement):
+        self.logger.debug('_extractVideo from {}',rootElement)
         videourl = ''
         if rootElement.get('video') is not None:
             if rootElement.get('video').get('streamApiUrlIOS') is not None:
                 videourl = rootElement.get('video').get('streamApiUrlIOS')
             elif rootElement.get('video').get('streamApiUrlAndroid') is not None:
                 videourl = rootElement.get('video').get('streamApiUrlAndroid')
-            elif len(list(rootElement.get('video').keys())) > 0:
-                videourl = list(rootElement.get('video').keys())[-1]
+            elif rootElement.get('video').get('streamApiUrlVoice') is not None:
+                videourl = rootElement.get('video').get('streamApiUrlVoice')
+        self.logger.debug('_extractVideo found {}',videourl)
         return videourl;
 
     def _extractDate(self, rootElement):
