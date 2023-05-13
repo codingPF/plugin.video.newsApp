@@ -164,14 +164,19 @@ class DpTagesschau(object):
                 if rootElement.get('teaserImage').get('imageVariants').get('16x9-512') is not None:
                     image = rootElement.get('teaserImage').get('imageVariants').get('16x9-512')
                 elif len(list(rootElement.get('teaserImage').get('imageVariants').keys())) > 0:
-                    image = list(rootElement.get('teaserImage').get('imageVariants').keys())[-1]
+                    imageKey = list(rootElement.get('teaserImage').get('imageVariants').keys())[-1]
+                    image = rootElement.get('teaserImage').get('imageVariants').get(imageKey)
+        self.logger.debug('_extractImage found {}', image)
         return image
 
     def _extractVideo(self, rootElement):
+        self.logger.debug('_extractVideo from {}', rootElement)
         videourl = ''
         if rootElement.get('streams') is not None:
                 if rootElement.get('streams').get('adaptivestreaming') is not None:
                     videourl = rootElement.get('streams').get('adaptivestreaming')
                 elif len(list(rootElement.get('teaserImage').get('imageVariants').keys())) > 0:
-                    videourl = list(rootElement.get('teaserImage').get('imageVariants').keys())[-1]
+                    videoUrlKey = list(rootElement.get('teaserImage').get('imageVariants').keys())[-1] 
+                    videourl = rootElement.get('teaserImage').get('imageVariants').keys().get(videoUrlKey)
+        self.logger.debug('_extractVideo found {}', videourl)           
         return videourl
