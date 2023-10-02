@@ -57,12 +57,12 @@ class DpTagesschau(object):
             #
             startTime = channel.get('start')
             endTime = channel.get('end')
-            if dataModel.title.startswith('Aktuelle Sendung: Tagesthemen') and startTime is not None and endTime is not None:
+            if dataModel.title is not None and dataModel.title.startswith('Aktuelle Sendung: Tagesthemen') and startTime is not None and endTime is not None:
                 dataModel.urlAdaptive = dataModel.urlAdaptive + '?start={}&end={}'.format(startTime, (startTime+1000)) #??
                 self.logger.debug('Aktuelle Sendung {}',dataModel.urlAdaptive)
                 self.logger.debug('Aktuelle Sendung Times start {} end {}',startTime,endTime)
                 dataModel.aired = datetime.datetime.fromtimestamp(startTime).isoformat()
-            elif dataModel.title.startswith('Aktuelle Sendung') and startTime is not None and endTime is not None:
+            elif dataModel.title is not None and dataModel.title.startswith('Aktuelle Sendung') and startTime is not None and endTime is not None:
                 dataModel.urlAdaptive = dataModel.urlAdaptive + '?start={}&end={}'.format(startTime, endTime)
                 self.logger.debug('Aktuelle Sendung Times start {} end {}',startTime,endTime)
                 self.logger.debug('Aktuelle Sendung {}',dataModel.urlAdaptive)
