@@ -72,12 +72,7 @@ jobs:
           zip -r $filename ${{ github.event.repository.name }}
           mv .git ${{ github.event.repository.name }}
           echo "filename=$filename" >> $GITHUB_OUTPUT
-        working-directory: ${{ github.event.repository.name }}
-
-      - name: Update Target Repository (Nexus)
-        id: update-nexus-repository
-        run: |
-          cp ${{ github.event.repository.name }} ADDON_REPOSITORY_NAME/leia/zips/${{ github.event.repository.name }}/
+          cp $filename ${{ env.ADDON_REPOSITORY_NAME }}/leia/zips/${{ github.event.repository.name }}/
         working-directory: ${{ github.event.repository.name }}
 
       - name: Commit & Push changes
