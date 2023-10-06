@@ -78,7 +78,7 @@ jobs:
       - name: Commit & Push changes
         uses: actions-js/push@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.TARGET_REPO_TOKEN }}
           repository: ${{ env.ADDON_REPOSITORY_URL }}
           directory: ${{ env.ADDON_REPOSITORY_NAME }}
           
