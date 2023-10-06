@@ -41,7 +41,8 @@ jobs:
       - name: Checkout Add-on
         uses: actions/checkout@v3
         with:
-          repository: '${{ env.ADDON_REPOSITORY_URL }}'
+          repository: ${{ env.ADDON_REPOSITORY_URL }}
+          path: ${{ env.ADDON_REPOSITORY_NAME }}
 
       - name: Install dependencies
         run: |
