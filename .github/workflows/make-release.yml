@@ -79,4 +79,7 @@ jobs:
         uses: actions-js/push@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ env.ADDON_REPOSITORY_URL }}
+          path: ${{ env.ADDON_REPOSITORY_NAME }}
+          
 
