@@ -120,14 +120,14 @@ class Main(Kodi):
             dataArray.extend(DpTagesschau.DpTagesschau().loadData())
             #
             ardFolderUrl = self.generateUrl({'mode': "ardFolder"})
-            ardIcon = pyUtils.createPath((self.getAddonPath(), 'resources', 'ard.png'))
+            ardIcon = pyUtils.createPath((self.getAddonPath(), 'resources', 'icons', 'ard.png'))
             ui.addDirectoryItem(pTitle='ARD', pUrl=ardFolderUrl, pIcon=ardIcon)
         #
         if self.settings.isUseZdf():
             dataArray.extend(DpZdfHeute.DpZdfHeute().loadData())
             #
             zdfFolderUrl = self.generateUrl({'mode': "zdfFolder"})
-            zdfIcon = pyUtils.createPath((self.getAddonPath(), 'resources', 'zdf.png'))
+            zdfIcon = pyUtils.createPath((self.getAddonPath(), 'resources', 'icons', 'zdf.png'))
             ui.addDirectoryItem(pTitle='ZDF', pUrl=zdfFolderUrl, pIcon=zdfIcon)
         #
         dataArray = sorted(dataArray, key=lambda d: d.aired, reverse=True) 
