@@ -55,14 +55,18 @@ class DpTagesschau(object):
             dataModel.urlAdaptive = dataModel.url
             dataModel.mode = 'play'
             #
+            # sometimes title is empty
+            if dataModel.title is None:
+                dataModel.title = self._extractTrackingTitle(channel)
+            #
             startTime = channel.get('start')
             endTime = channel.get('end')
-            if dataModel.title.startswith('Aktuelle Sendung: Tagesthemen') and startTime is not None and endTime is not None:
+            if dataModel.title is not None and dataModel.title.startswith('Aktuelle Sendung: Tagesthemen') and startTime is not None and endTime is not None:
                 dataModel.urlAdaptive = dataModel.urlAdaptive + '?start={}&end={}'.format(startTime, (startTime+1000)) #??
                 self.logger.debug('Aktuelle Sendung {}',dataModel.urlAdaptive)
                 self.logger.debug('Aktuelle Sendung Times start {} end {}',startTime,endTime)
                 dataModel.aired = datetime.datetime.fromtimestamp(startTime).isoformat()
-            elif dataModel.title.startswith('Aktuelle Sendung') and startTime is not None and endTime is not None:
+            elif dataModel.title is not None and dataModel.title.startswith('Aktuelle Sendung') and startTime is not None and endTime is not None:
                 dataModel.urlAdaptive = dataModel.urlAdaptive + '?start={}&end={}'.format(startTime, endTime)
                 self.logger.debug('Aktuelle Sendung Times start {} end {}',startTime,endTime)
                 self.logger.debug('Aktuelle Sendung {}',dataModel.urlAdaptive)
@@ -180,3 +184,13 @@ class DpTagesschau(object):
                     videourl = rootElement.get('teaserImage').get('imageVariants').keys().get(videoUrlKey)
         self.logger.debug('_extractVideo found {}', videourl)           
         return videourl
+
+    def _extractTrackingTitle(self, rootElement):
+        self.logger.debug('_extractTrackingTitle from {}', rootElement)
+        altTitle = 'UNK'
+        if rootElement.get('tracking') is not None:
+            if len(rootElement.get('tracking')) > 1:
+                if rootElement.get('tracking')[1].get('title') is not None:
+                    altTitle = rootElement.get('tracking')[1].get('title')
+                    self.logger.debug('_extractTrackingTitle found {}', altTitle)           
+        return altTitle
