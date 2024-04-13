@@ -5,12 +5,11 @@ The main addon module
 SPDX-License-Identifier: MIT
 
 """
-import resources.lib.appContext as appContext
-from resources.lib.kodi import Kodi
-from resources.lib.kodiUi import KodiUI
+from resources.lib.fw.kodi import Kodi
+from resources.lib.fw.kodiUi import KodiUI
 import resources.lib.dpTagesschau as DpTagesschau
 import resources.lib.dpZdfHeute as DpZdfHeute
-import resources.lib.utils as pyUtils
+import resources.lib.fw.utils as pyUtils
 
 
 #
@@ -18,8 +17,7 @@ class Main(Kodi):
 
     def __init__(self):
         super(Main, self).__init__()
-        self.logger = appContext.LOGGER.getInstance('MAIN')
-        self.settings = appContext.SETTINGS
+        self.logger = self.createLogger('MAIN')
         #
 
     def run(self):
@@ -30,7 +28,7 @@ class Main(Kodi):
         if mode == 'playZdfItem':
             tgtUrl = pyUtils.b64decode(self.getParameters('urlB64'))
             self.logger.debug('resolve target url for ZDF {}', tgtUrl)
-            vLinks = DpZdfHeute.DpZdfHeute().loadVideoUrl(tgtUrl)
+            vLinks = DpZdfHeute.DpZdfHeute(self).loadVideoUrl(tgtUrl)
             self.logger.debug('VideoUrls {}', vLinks)
             if vLinks is not None:
                 if (len(vLinks.get('adaptive')) > 0):
@@ -48,17 +46,8 @@ class Main(Kodi):
                                 
         elif mode == 'ardEpisode':
             tgtUrl = pyUtils.b64decode(self.getParameters('urlB64'))
-            vLinks = DpTagesschau.DpTagesschau().loadEpisode(tgtUrl)
+            vLinks = DpTagesschau.DpTagesschau(self).loadEpisode(tgtUrl)
             self.playItem(vLinks)
-            #
-        elif mode == 'download':
-            #
-            rs = self.db.getEpisode(parameterId)
-            url = rs[0][5]
-            name = rs[0][1]
-            name = pyUtils.file_cleanupname(name)
-            fullName = pyUtils.createPath((self.translatePath(self.settings.getDownloadPath()), name))
-            pyUtils.url_retrieve(url, fullName, reporthook=kodiPG.update, chunk_size=65536, aborthook=self.getAbortHook())
             #
         elif mode == 'zdfFolder':
             #
@@ -78,13 +67,20 @@ class Main(Kodi):
 
         #
 
+    # General
+    def isUseZdf(self):
+        return self.getSetting('useZDF') == 'true'
+
+    def isUseArd(self):
+        return self.getSetting('useARD') == 'true'
+    
     # Processors
     
     # generate all ARD episodes from news
     def _generateArdFolder(self):
         self.logger.debug('_generateArdFolder')
         dataArray = []
-        dataArray.extend(DpTagesschau.DpTagesschau().loadShows())
+        dataArray.extend(DpTagesschau.DpTagesschau(self).loadShows())
         ui = KodiUI(self)
         ui.addItems(dataArray,'play')
         ui.render()
@@ -93,7 +89,7 @@ class Main(Kodi):
     def _generateZdfEntity(self, pUrl):
         self.logger.debug('_generateZdfEntity')
         dataArray = []
-        dataArray.extend(DpZdfHeute.DpZdfHeute().loadBroadcasts(pUrl))
+        dataArray.extend(DpZdfHeute.DpZdfHeute(self).loadBroadcasts(pUrl))
         ui = KodiUI(self)
         ui.addItems(dataArray, 'playZdfItem')
         ui.render()
@@ -102,29 +98,30 @@ class Main(Kodi):
     def _generateZdfFolder(self):
         self.logger.debug('_generateZdfFolder')
         dataArray = []
-        dataArray.extend(DpZdfHeute.DpZdfHeute().loadShows())
-        ui = KodiUI(self, pViewId=self.resolveViewId('THUMBNAIL'))
+        dataArray.extend(DpZdfHeute.DpZdfHeute(self).loadShows())
+        ui = KodiUI(self)
         ui.addDirectories(dataArray,'zdfEntity')
         ui.render()
+        self.setViewId(self.resolveViewId('THUMBNAIL'))
 
     # generate top level menu
     # Folder for ARD and ZDF
     # plus items for all top level episodes for this day
     def _generateTopNewsList(self):
         self.logger.debug('_generateTopNewsList')
-        self.logger.debug('Settings: isUseArd "{}" isUseZdf "{}" type of {}', self.settings.isUseArd(), self.settings.isUseZdf(), type(self.settings.isUseArd()));
+        self.logger.debug('Settings: isUseArd "{}" isUseZdf "{}" type of {}', self.isUseArd(), self.isUseZdf(), type(self.isUseArd()));
         dataArray = []
         ui = KodiUI(self)
         #
-        if self.settings.isUseArd():
-            dataArray.extend(DpTagesschau.DpTagesschau().loadData())
+        if self.isUseArd():
+            dataArray.extend(DpTagesschau.DpTagesschau(self).loadData())
             #
             ardFolderUrl = self.generateUrl({'mode': "ardFolder"})
             ardIcon = pyUtils.createPath((self.getAddonPath(), 'resources', 'icons', 'ard.png'))
             ui.addDirectoryItem(pTitle='ARD', pUrl=ardFolderUrl, pIcon=ardIcon)
         #
-        if self.settings.isUseZdf():
-            dataArray.extend(DpZdfHeute.DpZdfHeute().loadData())
+        if self.isUseZdf():
+            dataArray.extend(DpZdfHeute.DpZdfHeute(self).loadData())
             #
             zdfFolderUrl = self.generateUrl({'mode': "zdfFolder"})
             zdfIcon = pyUtils.createPath((self.getAddonPath(), 'resources', 'icons', 'zdf.png'))

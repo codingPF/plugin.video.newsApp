@@ -85,15 +85,95 @@ def dict_to_utf(d):
 # EPOCH FROM TZ
 #
 def epoch_from_timestamp(pTimestampString, pTsPatter='%Y-%m-%dT%H:%M:%S.%f%z'):
-    new_time = datetime.datetime.strptime(pTimestampString, pTsPatter)
-    return int(new_time.timestamp())
+    rs = 0
+    try:
+        new_time = datetime.datetime.strptime(pTimestampString, pTsPatter)
+        rs = int(new_time.timestamp())
+    except TypeError:
+        # TypeError bug in python
+        new_time = time.mktime(time.strptime(pTimestampString, pTsPatter))
+        rs = int(new_time)
+    return rs
 
 def datetime_from_utc_to_local(utc_datetime):
     now_timestamp = time.time()
     offset = datetime.datetime.fromtimestamp(now_timestamp) - datetime.datetime.utcfromtimestamp(now_timestamp)
     return utc_datetime + offset
     
+########################################################################
+
+def extractJsonValue(rootElement, *args):
+    if rootElement is None:
+        return None
+    #
+    root = rootElement;
+    for searchPath in args:
+        if isinstance(root, list):
+            if len(root) > searchPath:
+                root = root[searchPath]
+            else:
+                return None
+        else:
+            if searchPath in root:
+                root = root.get(searchPath)
+            else:
+                return None
+    return root;
+    
+def loadJson(filename):
+    with closing(open(filename, encoding='utf-8')) as json_file:
+        data = json.load(json_file)
+    return data
+
+
+def saveJson(filename, data):
+    with closing(open(filename, 'w', encoding='utf-8')) as json_file:
+        json.dump(data, json_file)
+        json_file.flush()
+
+##########################################################################################
+
+
+def b64encode(pMessage):
+    if isinstance(pMessage, str):
+        message_bytes = pMessage.encode('utf-8')
+    else:
+        message_bytes = pMessage
+    base64_bytes = base64.b64encode(message_bytes)
+    base64_message = base64_bytes.decode('utf-8')
+    return base64_message
+
+
+def b64decode(pMessage):
+    if isinstance(pMessage, str):
+        base64_bytes = pMessage.encode('utf-8')
+    else:
+        base64_bytes = pMessage
+    message_bytes = base64.b64decode(base64_bytes)
+    message = message_bytes.decode('utf-8')
+    return message
+
+###########################################################################################
+
+def makeDictUnique(pEntries, pAttribute = "name"):
+    unique_dict = {}
+    cnt = 0
+    for item in pEntries:
+        item.update({'sortByOriginalOrderIndex':cnt})
+        cnt += 1
+        name = item[pAttribute]
+        if name not in unique_dict:
+            unique_dict[name] = item
+    unique_array = list(unique_dict.values())
+    sorted_unique_array = sorted(unique_array, key=lambda x: x['sortByOriginalOrderIndex'])
+    return sorted_unique_array
+
+
 #########################################################################
+
+
+
+#
 # FILE functions
 
 
@@ -194,54 +274,7 @@ def file_cleanupname(val):
     cStr = re.sub(r'(?u)[^-\w.]', '', cStr)
     return cStr
 
-def extractJsonValue(rootElement, *args):
-    if rootElement is None:
-        return None
-    #
-    root = rootElement;
-    for searchPath in args:
-        if isinstance(root, list):
-            if len(root) > searchPath:
-                root = root[searchPath]
-            else:
-                return None
-        else:
-            if searchPath in root:
-                root = root.get(searchPath)
-            else:
-                return None
-    return root;
-    
 #########################################################################################
-
-
-def loadJson(filename):
-    with closing(open(filename, encoding='utf-8')) as json_file:
-        data = json.load(json_file)
-    return data
-
-
-def saveJson(filename, data):
-    with closing(open(filename, 'w', encoding='utf-8')) as json_file:
-        json.dump(cache, json_file)
-
-##########################################################################################
-
-
-def b64encode(pMessage):
-    message_bytes = pMessage.encode('ascii')
-    base64_bytes = base64.b64encode(message_bytes)
-    base64_message = base64_bytes.decode('ascii')
-    return base64_message
-
-
-def b64decode(pMessage):
-    base64_bytes = pMessage.encode('ascii')
-    message_bytes = base64.b64decode(base64_bytes)
-    message = message_bytes.decode('ascii')
-    return message
-
-###########################################################################################
 
 def url_to_string(url, chunk_size=65536):
     output = ''

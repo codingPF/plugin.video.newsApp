@@ -9,9 +9,8 @@ SPDX-License-Identifier: MIT
 import json
 import time
 
-import resources.lib.appContext as appContext
-import resources.lib.webResource as WebResource
-import resources.lib.ui.episodeModel as EpisodeModel
+import resources.lib.fw.webResource as WebResource
+from resources.lib.fw.params import Params
 
 
 class DpZdfHeute(object):
@@ -20,20 +19,11 @@ class DpZdfHeute(object):
 
     """
 
-    def __init__(self):
-        self.logger = appContext.LOGGER.getInstance('DpZdfHeute')
-        self.settings = appContext.SETTINGS
+    def __init__(self, pAddon):
+        self.addon = pAddon
+        self.logger = self.addon.createLogger('DpZdfHeute')
         self.starttime = time.time()
 
-    def run(self):
-        #
-        if not(self.db.isInitialized()):
-            self.settings.setLastUpdateIndex('0')
-            self.db.create()
-        #
-        self.loadcategory()
-        #
-    
     def loadData(self):
         #
         resultArray = []
@@ -41,14 +31,14 @@ class DpZdfHeute(object):
         # self.kodiPG = PG.KodiProgressDialog()
         # self.kodiPG.create(30102)
         #
-        dn = WebResource.WebResource('https://zdf-heute-cdn.live.cellular.de/news/tv-page')
+        dn = WebResource.WebResource(self.addon, 'https://zdf-heute-cdn.live.cellular.de/news/tv-page')
         dataString = dn.retrieveAsString()
         data = json.loads(dataString)
         #
         data = data.get('stage')
         data = data.get('teaser')
         for channel in data:
-            dataModel = EpisodeModel.EpisodeModel()
+            dataModel = Params()
             dataModel.channel = 'ZDF'
             dataModel.id = channel.get('id')
             dataModel.title = channel.get('title')
@@ -71,14 +61,14 @@ class DpZdfHeute(object):
         # self.kodiPG = PG.KodiProgressDialog()
         # self.kodiPG.create(30102)
         #
-        dn = WebResource.WebResource(pUrl)
+        dn = WebResource.WebResource(self.addon, pUrl)
         dataString = dn.retrieveAsString()
         data = json.loads(dataString)
         #
         data = data.get('module')
         data = data[0].get('teaser')
         for channel in data:
-            dataModel = EpisodeModel.EpisodeModel()
+            dataModel = Params()
             dataModel.channel = 'ZDF'
             dataModel.id = channel.get('id')
             dataModel.title = channel.get('title')
@@ -101,14 +91,14 @@ class DpZdfHeute(object):
         # self.kodiPG = PG.KodiProgressDialog()
         # self.kodiPG.create(30102)
         #
-        dn = WebResource.WebResource('https://zdf-heute-cdn.live.cellular.de/news/tv-page')
+        dn = WebResource.WebResource(self.addon, 'https://zdf-heute-cdn.live.cellular.de/news/tv-page')
         dataString = dn.retrieveAsString()
         data = json.loads(dataString)
         #
         data = data.get('module')
         data = data[0].get('teaser')
         for channel in data:
-            dataModel = EpisodeModel.EpisodeModel()
+            dataModel = Params()
             dataModel.channel = 'ZDF'
             dataModel.id = channel.get('id')
             dataModel.title = channel.get('title')
@@ -125,14 +115,14 @@ class DpZdfHeute(object):
     
     def _loadMore(self):
                 #
-        dn = WebResource.WebResource('https://zdf-heute-cdn.live.cellular.de/news/start-page')
+        dn = WebResource.WebResource(self.addon, 'https://zdf-heute-cdn.live.cellular.de/news/start-page')
         dataString = dn.retrieveAsString()
         data = json.loads(dataString)
         #
         data = data.get('navigation')
         data = data.get('menuItems')
         for menuItem in data:
-            dataModel = EpisodeModel.EpisodeModel()
+            dataModel = Params()
             dataModel.channel = 'ZDF'
             dataModel.id = menuItem.get('id')
             dataModel.title = menuItem.get('title')
@@ -140,7 +130,7 @@ class DpZdfHeute(object):
             dataModel.url = menuItem.get('url')
 
     def loadVideoUrl(self, pUrl):
-        dn = WebResource.WebResource(pUrl, {'Api-Auth':'Bearer 20c238b5345eb428d01ae5c748c5076f033dfcc7'})
+        dn = WebResource.WebResource(self.addon, pUrl, {'Api-Auth':'Bearer 20c238b5345eb428d01ae5c748c5076f033dfcc7'})
         dataString = dn.retrieveAsString()
         data = json.loads(dataString)
         #

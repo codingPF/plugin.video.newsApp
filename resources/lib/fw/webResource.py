@@ -4,10 +4,8 @@ SPDX-License-Identifier: MIT
 """
 
 # pylint: disable=too-many-lines,line-too-long
-import resources.lib.appContext as appContext
 #
 import zlib
-#
 from contextlib import closing
 #
 try:
@@ -24,6 +22,7 @@ except ImportError:
     from cStringIO import StringIO
     PY2FOUND = True
 
+
 class WebResource(object):
     """
     Download url
@@ -35,17 +34,14 @@ class WebResource(object):
 
     """
 
-    def __init__(self, pUrl, pHeader = None, pAbortHook = None, pProgressListener = None, pChunkSize=8192, pTimeout=10):
-        self.logger = appContext.LOGGER.getInstance('WebResource')
-        #
-        self.abortHook = pAbortHook if pAbortHook else lambda: False
-        #
-        self.progressListener = pProgressListener if pProgressListener else self._progressListener
+    def __init__(self, pAddon, pUrl, pHeader = None, pAbortHook = None, pProgressListener = None, pChunkSize=8192, pTimeout=10):
+        self.addon = pAddon
+        self.logger = pAddon.createLogger('WebResource')
+        self.abortHook = pAddon.getAbortHook()
+        self.progressListener = pAddon.getProgressDialog().updateProgress
         #
         self.connectionTimeout = pTimeout
-        #
         self.chunkSize = pChunkSize
-        #
         if pHeader == None:
             self.header = {
                 'Accept-Encoding':'gzip, deflate',
