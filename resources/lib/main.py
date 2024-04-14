@@ -7,10 +7,8 @@ SPDX-License-Identifier: MIT
 """
 from ckfw.kodi import Kodi
 from ckfw import kodiUi as KodiUI
-import resources.lib.dpTagesschau as DpTagesschau
-import resources.lib.dpZdfHeute as DpZdfHeute
-
-
+from . import dpTagesschau as DpTagesschau
+from . import dpZdfHeute as DpZdfHeute
 #
 class Main(Kodi):
 
