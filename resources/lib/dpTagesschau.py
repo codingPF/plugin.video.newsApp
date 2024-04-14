@@ -9,8 +9,8 @@ SPDX-License-Identifier: MIT
 import json
 import time
 import datetime
-from ckfw import webResource as WebResource
-from ckfw import params as Params
+from ckfw.webResource import WebResource
+from ckfw.params import Params
 
 
 class DpTagesschau(object):
@@ -29,7 +29,7 @@ class DpTagesschau(object):
         resultArray = []
         #
         self.logger.debug('loadData')
-        dn = WebResource.WebResource(self.addon, 'https://www.tagesschau.de/api2u/channels')
+        dn = WebResource(self.addon, 'https://www.tagesschau.de/api2u/channels')
         dataString = dn.retrieveAsString()
         data = json.loads(dataString)
         #
@@ -68,7 +68,7 @@ class DpTagesschau(object):
 
     def loadEpisode(self, pUrl):
         self.logger.debug('loadEpisode for {}', pUrl)
-        dn = WebResource.WebResource(self.addon, pUrl)
+        dn = WebResource(self.addon, pUrl)
         dataString = dn.retrieveAsString()
         data = json.loads(dataString)
         url = ''
@@ -94,7 +94,7 @@ class DpTagesschau(object):
         resultArray = []
         #
         self.logger.debug('loadShows')
-        dn = WebResource.WebResource(self.addon, 'https://www.tagesschau.de/api2u/news')
+        dn = WebResource(self.addon, 'https://www.tagesschau.de/api2u/news')
         dataString = dn.retrieveAsString()
         # load all top show urls to have the index page for all episodes
         data = json.loads(dataString)
@@ -117,7 +117,7 @@ class DpTagesschau(object):
         resultArray = []
         #
         self.logger.debug('loadBroadcasts')
-        dn = WebResource.WebResource(self.addon, pUrl)
+        dn = WebResource(self.addon, pUrl)
         dataString = dn.retrieveAsString()
         data = json.loads(dataString)
         data = data.get('latestBroadcastsPerType')

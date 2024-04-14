@@ -8,8 +8,8 @@ SPDX-License-Identifier: MIT
 # pylint: disable=too-many-lines,line-too-long
 import json
 import time
-from ckfw import webResource as WebResource
-from ckfw import params as Params
+from ckfw.webResource import WebResource
+from ckfw.params import Params
 
 
 class DpZdfHeute(object):
@@ -30,7 +30,7 @@ class DpZdfHeute(object):
         # self.kodiPG = PG.KodiProgressDialog()
         # self.kodiPG.create(30102)
         #
-        dn = WebResource.WebResource(self.addon, 'https://zdf-heute-cdn.live.cellular.de/news/tv-page')
+        dn = WebResource(self.addon, 'https://zdf-heute-cdn.live.cellular.de/news/tv-page')
         dataString = dn.retrieveAsString()
         data = json.loads(dataString)
         #
@@ -60,7 +60,7 @@ class DpZdfHeute(object):
         # self.kodiPG = PG.KodiProgressDialog()
         # self.kodiPG.create(30102)
         #
-        dn = WebResource.WebResource(self.addon, pUrl)
+        dn = WebResource(self.addon, pUrl)
         dataString = dn.retrieveAsString()
         data = json.loads(dataString)
         #
@@ -90,7 +90,7 @@ class DpZdfHeute(object):
         # self.kodiPG = PG.KodiProgressDialog()
         # self.kodiPG.create(30102)
         #
-        dn = WebResource.WebResource(self.addon, 'https://zdf-heute-cdn.live.cellular.de/news/tv-page')
+        dn = WebResource(self.addon, 'https://zdf-heute-cdn.live.cellular.de/news/tv-page')
         dataString = dn.retrieveAsString()
         data = json.loads(dataString)
         #
@@ -114,7 +114,7 @@ class DpZdfHeute(object):
     
     def _loadMore(self):
                 #
-        dn = WebResource.WebResource(self.addon, 'https://zdf-heute-cdn.live.cellular.de/news/start-page')
+        dn = WebResource(self.addon, 'https://zdf-heute-cdn.live.cellular.de/news/start-page')
         dataString = dn.retrieveAsString()
         data = json.loads(dataString)
         #
@@ -129,7 +129,7 @@ class DpZdfHeute(object):
             dataModel.url = menuItem.get('url')
 
     def loadVideoUrl(self, pUrl):
-        dn = WebResource.WebResource(self.addon, pUrl, {'Api-Auth':'Bearer 20c238b5345eb428d01ae5c748c5076f033dfcc7'})
+        dn = WebResource(self.addon, pUrl, {'Api-Auth':'Bearer 20c238b5345eb428d01ae5c748c5076f033dfcc7'})
         dataString = dn.retrieveAsString()
         data = json.loads(dataString)
         #
