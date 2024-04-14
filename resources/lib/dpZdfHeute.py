@@ -8,9 +8,8 @@ SPDX-License-Identifier: MIT
 # pylint: disable=too-many-lines,line-too-long
 import json
 import time
-
-import resources.lib.fw.webResource as WebResource
-from resources.lib.fw.params import Params
+from ckfw import webResource as WebResource
+from ckfw import params as Params
 
 
 class DpZdfHeute(object):

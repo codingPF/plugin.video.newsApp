@@ -5,11 +5,10 @@ The main addon module
 SPDX-License-Identifier: MIT
 
 """
-from resources.lib.fw.kodi import Kodi
-from resources.lib.fw.kodiUi import KodiUI
+from ckfw.kodi import Kodi
+from ckfw import kodiUi as KodiUI
 import resources.lib.dpTagesschau as DpTagesschau
 import resources.lib.dpZdfHeute as DpZdfHeute
-import resources.lib.fw.utils as pyUtils
 
 
 #
