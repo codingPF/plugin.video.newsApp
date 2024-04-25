@@ -30,7 +30,7 @@ class DpZdfHeute(object):
         # self.kodiPG = PG.KodiProgressDialog()
         # self.kodiPG.create(30102)
         #
-        dn = WebResource(self.addon, 'https://zdf-heute-cdn.live.cellular.de/news/tv-page')
+        dn = WebResource(self.addon, 'https://zdf-prod-futura.zdf.de/news/tv-page')
         dataString = dn.retrieveAsString()
         data = json.loads(dataString)
         #
@@ -90,7 +90,7 @@ class DpZdfHeute(object):
         # self.kodiPG = PG.KodiProgressDialog()
         # self.kodiPG.create(30102)
         #
-        dn = WebResource(self.addon, 'https://zdf-heute-cdn.live.cellular.de/news/tv-page')
+        dn = WebResource(self.addon, 'https://zdf-prod-futura.zdf.de/news/tv-page')
         dataString = dn.retrieveAsString()
         data = json.loads(dataString)
         #
@@ -109,12 +109,12 @@ class DpZdfHeute(object):
             #
         return resultArray
 
-    ## https://zdf-heute-cdn.live.cellular.de/news/abo-brands
-    ## https://zdf-heute-cdn.live.cellular.de/news/start-page
+    ## https://zdf-prod-futura.zdf.de/news/abo-brands
+    ## https://zdf-prod-futura.zdf.de/news/start-page
     
     def _loadMore(self):
                 #
-        dn = WebResource(self.addon, 'https://zdf-heute-cdn.live.cellular.de/news/start-page')
+        dn = WebResource(self.addon, 'https://zdf-prod-futura.zdf.de/news/start-page')
         dataString = dn.retrieveAsString()
         data = json.loads(dataString)
         #
