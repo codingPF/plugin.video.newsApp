@@ -64,20 +64,21 @@ class DpZdfHeute(object):
         dataString = dn.retrieveAsString()
         data = json.loads(dataString)
         #
-        data = data.get('module')
-        data = data[0].get('teaser')
-        for channel in data:
+        modules = data.get('module')
+        for module in modules:
+            teasers = module.get('teaser')
+            for teaser in teasers:
             dataModel = Params()
             dataModel.channel = 'ZDF'
-            dataModel.id = channel.get('id')
-            dataModel.title = channel.get('title')
-            dataModel.description = channel.get('description')
-            dataModel.aired = self._extractDate(channel)
-            dataModel.image = self._extractImage(channel)
-            dataModel.urlAdaptive = self._extractVideo(channel);
+                dataModel.id = teaser.get('id')
+                dataModel.title = teaser.get('title')
+                dataModel.description = teaser.get('description')
+                dataModel.aired = self._extractDate(teaser)
+                dataModel.image = self._extractImage(teaser)
+                dataModel.urlAdaptive = self._extractVideo(teaser);
             dataModel.url = dataModel.urlAdaptive
-            if channel.get('video') is not None:
-                dataModel.duration = channel.get('video').get('duration')
+                if teaser.get('video') is not None:
+                    dataModel.duration = teaser.get('video').get('duration')
             #
             resultArray.append(dataModel)
             #

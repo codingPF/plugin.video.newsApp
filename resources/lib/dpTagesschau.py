@@ -171,7 +171,7 @@ class DpTagesschau(object):
                     videourl = rootElement.get('streams').get('adaptivestreaming')
                 elif len(list(rootElement.get('teaserImage').get('imageVariants').keys())) > 0:
                     videoUrlKey = list(rootElement.get('teaserImage').get('imageVariants').keys())[-1] 
-                    videourl = rootElement.get('teaserImage').get('imageVariants').keys().get(videoUrlKey)
+                    videourl = rootElement.get('teaserImage').get('imageVariants').get(videoUrlKey)
         self.logger.debug('_extractVideo found {}', videourl)           
         return videourl
 
