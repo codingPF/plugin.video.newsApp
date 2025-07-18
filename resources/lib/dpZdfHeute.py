@@ -68,15 +68,15 @@ class DpZdfHeute(object):
         for module in modules:
             teasers = module.get('teaser')
             for teaser in teasers:
-            dataModel = Params()
-            dataModel.channel = 'ZDF'
+                dataModel = Params()
+                dataModel.channel = 'ZDF'
                 dataModel.id = teaser.get('id')
                 dataModel.title = teaser.get('title')
                 dataModel.description = teaser.get('description')
                 dataModel.aired = self._extractDate(teaser)
                 dataModel.image = self._extractImage(teaser)
                 dataModel.urlAdaptive = self._extractVideo(teaser);
-            dataModel.url = dataModel.urlAdaptive
+                dataModel.url = dataModel.urlAdaptive
                 if teaser.get('video') is not None:
                     dataModel.duration = teaser.get('video').get('duration')
             #
