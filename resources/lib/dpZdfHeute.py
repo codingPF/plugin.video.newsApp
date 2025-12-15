@@ -79,9 +79,9 @@ class DpZdfHeute(object):
                 dataModel.url = dataModel.urlAdaptive
                 if teaser.get('video') is not None:
                     dataModel.duration = teaser.get('video').get('duration')
-            #
-            resultArray.append(dataModel)
-            #
+                #
+                resultArray.append(dataModel)
+                #
         return resultArray
 
     def loadShows(self):

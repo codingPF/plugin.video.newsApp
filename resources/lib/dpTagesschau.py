@@ -42,6 +42,7 @@ class DpTagesschau(object):
             dataModel.aired = self._extractDate(channel)
             dataModel.image = self._extractImage(channel)
             dataModel.url = self._extractVideo(channel)
+            dataModel.duration = self._extractDuration(channel)
             dataModel.urlAdaptive = dataModel.url
             dataModel.mode = 'play'
             #
@@ -107,6 +108,7 @@ class DpTagesschau(object):
                 dataModel.aired = self._extractDate(entry)
                 dataModel.url = self._extractVideo(entry)
                 dataModel.image = self._extractImage(entry)
+                dataModel.duration = self._extractDuration(entry);
                 self.logger.debug('add image for {} {}',dataModel.title,dataModel.image)             
                 resultArray.append(dataModel)
             #
@@ -183,4 +185,13 @@ class DpTagesschau(object):
                 if rootElement.get('tracking')[1].get('title') is not None:
                     altTitle = rootElement.get('tracking')[1].get('title')
                     self.logger.debug('_extractTrackingTitle found {}', altTitle)           
-        return altTitle
+        return altTitle    
+    def _extractDuration(self, rootElement):
+        self.logger.debug('_extractDuration from {}', rootElement)
+        duration = 0;
+        if rootElement.get('tracking') is not None:
+            if len(rootElement.get('tracking')) > 1:
+                if rootElement.get('tracking')[1].get('length') is not None:
+                    duration = int(rootElement.get('tracking')[1].get('length'))
+                    self.logger.debug('_extractDuration found {}', duration)           
+        return duration
