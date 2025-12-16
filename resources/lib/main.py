@@ -60,6 +60,8 @@ class Main(Kodi):
             #
             self._generateArdFolder()
             #
+        elif mode == 'ARDArchive':
+            self._generateARDArchive(self.getParameters('date'))
         else:
             self._generateTopNewsList()
 
@@ -79,8 +81,18 @@ class Main(Kodi):
         self.logger.debug('_generateArdFolder')
         dataArray = []
         dataArray.extend(DpTagesschau(self).loadShows())
+        from datetime import date, timedelta
+        last_three_dates = [
+            (date.today() - timedelta(days=i)).isoformat()
+            for i in range(3)
+        ]
+
         ui = KodiUI(self)
+        for d in last_three_dates:
+            ui.addDirectoryItem(pTitle='Archive ' + d, pUrl=self.generateUrl({'mode': "ARDArchive", 'date':d}), pIcon='https://upload.wikimedia.org/wikipedia/commons/0/06/Tagesschau.de_logo.svg')
+
         ui.addItems(dataArray,'play')
+        #
         ui.render()
 
     # generate all episodes for a ZDF show
@@ -101,6 +113,15 @@ class Main(Kodi):
         ui.addDirectories(dataArray,'zdfEntity')
         ui.render()
         self.setViewId(self.resolveViewId('THUMBNAIL'))
+
+    # ARD Archive
+    def _generateARDArchive(self, pDate):
+        self.logger.debug('_generateARDArchive')
+        dataArray = []
+        dataArray.extend(DpTagesschau(self).loadArchive(pDate))
+        ui = KodiUI(self)
+        ui.addItems(dataArray,'play')
+        ui.render()
 
     # generate top level menu
     # Folder for ARD and ZDF

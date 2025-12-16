@@ -146,6 +146,53 @@ class DpTagesschau(object):
             #
         return resultArray
 
+    def loadArchive(self, pDate):
+        #
+        resultArray = []
+        #
+        self.logger.debug('loadArchive ' + pDate)
+        dn = WebResource(self.addon, 'https://www.tagesschau.de/archiv/sendungen?datum='+pDate)
+        dataString = dn.retrieveAsString()
+        dataString = dataString.decode("utf-8")        
+        import re
+        import html
+        import datetime as dt
+        pattern = re.compile(
+            r'data-v\s*=\s*"(.+?)"\s+data-v-type',
+            re.DOTALL
+        )
+        matches = pattern.findall(dataString)
+        parsed = []
+        for raw in matches:
+            decoded = html.unescape(raw)
+            try:
+                jsonObject = json.loads(decoded)
+                if jsonObject.get('mc'):
+                    parsed.append(jsonObject)
+            except json.JSONDecodeError:
+                pass  # ungültige JSONs ignorieren
+        for entry in parsed:
+            dataModel = Params()
+            dataModel.channel = 'ARD'
+            dataModel.id = entry.get('mc').get('meta').get('title')
+            dataModel.title = entry.get('mc').get('meta').get('title')
+            ts = entry.get('mc').get('meta').get('broadcastedOnDateTime')
+            if ts:
+                ts = ts[:-2] + ":" + ts[-2:]
+                dt_utc = datetime.datetime.fromisoformat(ts)
+                dt_local = dt_utc.astimezone()
+                #dt_utc = dt.datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S%z")
+                #dt_local = dt_utc.astimezone()
+                local_iso = dt_local.isoformat()
+                dataModel.aired = local_iso[0:19]
+            dataModel.url = entry.get('mc').get('streams')[0].get('media')[-1].get('url')
+            dataModel.image = entry.get('mc').get('meta').get('images')[0].get('url').replace('{size}','1x1-small').replace('{width}','512');
+            dataModel.duration = int(entry.get('mc').get('pluginData').get('trackingAgf@all').get('clipData').get('length'))
+            self.logger.debug('entry {}', dataModel)             
+            resultArray.append(dataModel)
+        #
+        return resultArray
+
     def _extractDate(self, rootElement):
         dt = '1970-01-01 00:00:00'
         if rootElement.get('date') is not None and len(rootElement.get('date')) > 0:
@@ -185,7 +232,8 @@ class DpTagesschau(object):
                 if rootElement.get('tracking')[1].get('title') is not None:
                     altTitle = rootElement.get('tracking')[1].get('title')
                     self.logger.debug('_extractTrackingTitle found {}', altTitle)           
-        return altTitle    
+        return altTitle
+
     def _extractDuration(self, rootElement):
         self.logger.debug('_extractDuration from {}', rootElement)
         duration = 0;
