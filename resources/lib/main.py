@@ -74,6 +74,10 @@ class Main(Kodi):
     def isUseArd(self):
         return self.getSetting('useARD') == 'true'
     
+    def getARDArchiveDaysBack(self):
+        value = self.getSetting('ARDArchiveDays')
+        return int(value) if value else 3
+    
     # Processors
     
     # generate all ARD episodes from news
@@ -84,7 +88,7 @@ class Main(Kodi):
         from datetime import date, timedelta
         last_three_dates = [
             (date.today() - timedelta(days=i)).isoformat()
-            for i in range(3)
+            for i in range(self.getARDArchiveDaysBack())
         ]
 
         ui = KodiUI(self)

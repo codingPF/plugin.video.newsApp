@@ -29,6 +29,12 @@ msgctxt "#30002"
 msgid "useZDF"
 msgstr "Show ZDF"
 
+msgctxt "30003"
+msgid "ARDArchiveDays"
+msgstr "ARD Archive Days Back"
+
+
+
 msgctxt "#30101"
 msgid "Airdate: {0:s}[CR][CR]"
 msgstr "Airdate: {0:s}[CR][CR]"
